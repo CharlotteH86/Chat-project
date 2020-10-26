@@ -1,7 +1,6 @@
 //Get hash from url
 const myPeerId = location.hash.slice(1);
-
-//
+const peersDiv = document.querySelector(".peers");
 
 //connect to to peer server
 peer = new Peer(myPeerId, {
@@ -13,11 +12,34 @@ peer = new Peer(myPeerId, {
 
 //Print peer id on connection 'open' event.
 peer.on("open", (id) => {
-  console.log(id);
+  //console.log(id);
   const myPeerIdEl = document.querySelector(".my-peer-id");
   myPeerIdEl.innerText = id;
 });
 
-console.log(peer);
+//Event listenet för click 'refresh list'
+const listPeersButtonEl = document.querySelector(".list-all-peers-button");
 
-//5501
+listPeersButtonEl.addEventListener("click", () => {
+  peer.listAllPeers((peers) => {
+    //console.log(peers);
+    const peersList = peers
+      .map((peer) => {
+        return `<li><button>${peer}</button></li>`;
+      })
+      .join("");
+
+      //connect-button peerId-${peer}
+
+    peersDiv.innerHTML = peersList;
+
+    //Add peers to html document
+    //connect-button peerId-${peer}
+    // <ul>
+    //  <li>
+    //      <button> "Peer id 1"</button>
+    //      <button> "Peer id 1"</button>
+    //  </li>
+    //</ul>
+  });
+});
