@@ -16,6 +16,9 @@ peer.on("open", (id) => {
   const myPeerIdEl = document.querySelector(".my-peer-id");
   myPeerIdEl.innerText = id;
 });
+peer.on("error", (errorMessage) => {
+  console.error(errorMessage);
+});
 
 //Event listenet för click 'refresh list'
 const listPeersButtonEl = document.querySelector(".list-all-peers-button");
@@ -23,15 +26,25 @@ const listPeersButtonEl = document.querySelector(".list-all-peers-button");
 listPeersButtonEl.addEventListener("click", () => {
   peer.listAllPeers((peers) => {
     //console.log(peers);
+    /* const listItems = peers.filter((peerId)=>{
+      if(peerId === peer._id) return false;
+      return true;
+    })*/
     const peersList = peers
+      .filter((peerId) => {
+        if (peerId === peer._id) return false;
+        return true;
+      })
       .map((peer) => {
-        return `<li><button>${peer}</button></li>`;
+        return `<li><button class="connect-button peerId-${peer}">${peer}</button></li>`;
       })
       .join("");
 
-      //connect-button peerId-${peer}
+    //connect-button peerId-${peer}
 
     peersDiv.innerHTML = peersList;
+
+    const ul ="<ul>"peersList"</ul>"
 
     //Add peers to html document
     //connect-button peerId-${peer}
