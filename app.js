@@ -1,58 +1,80 @@
 //Get hash from url
-const myPeerId = location.hash.slice(1);
-const peersDiv = document.querySelector(".peers");
+//wrappa varje app.js med (function(){})
+(function () {
+  const myPeerId = location.hash.slice(1);
+  const peersEl = document.querySelector(".peers");
 
-//connect to to peer server
-peer = new Peer(myPeerId, {
-  host: "glajan.com",
-  port: 8443,
-  path: "/myapp",
-  secure: true,
-});
+  //connect to to peer server
+  peer = new Peer(myPeerId, {
+    host: "glajan.com",
+    port: 8443,
+    path: "/myapp",
+    secure: true,
+  });
 
-//Print peer id on connection 'open' event.
-peer.on("open", (id) => {
-  //console.log(id);
-  const myPeerIdEl = document.querySelector(".my-peer-id");
-  myPeerIdEl.innerText = id;
-});
-peer.on("error", (errorMessage) => {
-  console.error(errorMessage);
-});
+  //Print peer id on connection 'open' event.
+  peer.on("open", (id) => {
+    //console.log(id);
+    const myPeerIdEl = document.querySelector(".my-peer-id");
+    myPeerIdEl.innerText = id;
+  });
+  peer.on("error", (errorMessage) => {
+    console.error(errorMessage);
+  });
 
-//Event listenet för click 'refresh list'
-const listPeersButtonEl = document.querySelector(".list-all-peers-button");
+  //Event listenet för click 'refresh list'
+  const listPeersButtonEl = document.querySelector(".list-all-peers-button");
 
-listPeersButtonEl.addEventListener("click", () => {
-  peer.listAllPeers((peers) => {
-    //console.log(peers);
-    /* const listItems = peers.filter((peerId)=>{
+  listPeersButtonEl.addEventListener("click", () => {
+    peer.listAllPeers((peers) => {
+      //console.log(peers);
+      /* const listItems = peers.filter((peerId)=>{
       if(peerId === peer._id) return false;
       return true;
     })*/
-    const peersList = peers
-      .filter((peerId) => {
-        if (peerId === peer._id) return false;
-        return true;
-      })
-      .map((peer) => {
-        return `<li><button class="connect-button peerId-${peer}">${peer}</button></li>`;
-      })
-      .join("");
 
-    //connect-button peerId-${peer}
+      const peersList = peers
+        .filter((peerId) => {
+          if (peerId === peer._id) return false;
+          return true;
+        })
+        .map((peer) => {
+          return `<li><button class="connect-button peerId-${peer}">${peer}</button></li>`;
+        })
+        .join("");
 
-    peersDiv.innerHTML = peersList;
+      //connect-button peerId-${peer}
 
-    const ul ="<ul>"peersList"</ul>"
+      peersEl.innerHTML = peersList;
 
-    //Add peers to html document
-    //connect-button peerId-${peer}
-    // <ul>
-    //  <li>
-    //      <button> "Peer id 1"</button>
-    //      <button> "Peer id 1"</button>
-    //  </li>
-    //</ul>
+      //Event listener for click on peer button
+      peersEl.addEventListener("click", (e) => {
+        if (!e.target.classList.contains("connect-button")) return;
+
+        console.log(e.target.innerText);
+        const theirPeerId = e.target.innerHTML;
+
+        //connect to peer
+        const dataConnection = peer.connect(theirPeerId);
+
+        dataConnection.on("open", () => {
+          //dispatch custome event with peer id.
+          const event = new CustomEvent("peer-changed", {
+            detail: theirPeerId,
+          });
+          document.dispatchEvent(event);
+        });
+      });
+      //const ul =`<ul>"peersList"</ul>`;
+
+      //Add peers to html document
+      //connect-button peerId-${peer}
+      // <ul>
+      //  <li>
+      //      <button> "Peer id 1"</button>
+      //      <button> "Peer id 1"</button>
+      //  </li>
+      //</ul>
+    });
   });
-});
+})();
