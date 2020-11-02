@@ -20,6 +20,24 @@
     port: 8443,
     path: "/myapp",
     secure: true,
+    config: {
+      iceServers: [
+        { urls: ["stun:eu-turn7.xirsys.com"] },
+        {
+          username:
+            "1FOoA8xKVaXLjpEXov-qcWt37kFZol89r0FA_7Uu_bX89psvi8IjK3tmEPAHf8EeAAAAAF9NXWZnbGFqYW4=",
+          credential: "83d7389e-ebc8-11ea-a8ee-0242ac140004",
+          urls: [
+            "turn:eu-turn7.xirsys.com:80?transport=udp",
+            "turn:eu-turn7.xirsys.com:3478?transport=udp",
+            "turn:eu-turn7.xirsys.com:80?transport=tcp",
+            "turn:eu-turn7.xirsys.com:3478?transport=tcp",
+            "turns:eu-turn7.xirsys.com:443?transport=tcp",
+            "turns:eu-turn7.xirsys.com:5349?transport=tcp",
+          ],
+        },
+      ],
+    },
   });
 
   //Print peer id on connection 'open' event.
