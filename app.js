@@ -1,6 +1,7 @@
 //Get hash from url
 //wrappa varje app.js med (function(){})
 (function () {
+  let dataConnection = null;
   const myPeerId = location.hash.slice(1);
   const peersEl = document.querySelector(".peers");
 
@@ -54,8 +55,12 @@
         console.log(e.target.innerText);
         const theirPeerId = e.target.innerHTML;
 
+        //close existing connection
+        dataConnection && dataConnection.close();
+        
         //connect to peer
-        const dataConnection = peer.connect(theirPeerId);
+        //const dataConnection = peer.connect(theirPeerId);
+        dataConnection = peer.connect(theirPeerId);
 
         dataConnection.on("open", () => {
           //dispatch custome event with peer id.
@@ -76,5 +81,20 @@
       //  </li>
       //</ul>
     });
+  });
+  document.addEventListener("peer-changed", (e) => {
+    console.log(e);
+    const peerId = e.detail;
+
+    const connectButtonEl = document.querySelector(
+      `.connect-button.peerId-${peerId}`
+    );
+
+    document.querySelectorAll(".connect-button.connected").forEach((button) => {
+      button.classList.remove("connected");
+    });
+
+    //add class 'connected' to click button.
+    connectButtonEl.classList.add("connected");
   });
 })();
