@@ -8,11 +8,13 @@
   const newMessageEl = document.querySelector(".new-message");
   const messagesEl = document.querySelector(".messages");
   const listPeersButtonEl = document.querySelector(".list-all-peers-button");
+  const time = new Date();
+  const theirVideoContainer = document.querySelector(".video-container.them");
 
   const printMessage = (text, who) => {
     const messageEl = document.createElement("div");
     messageEl.classList.add("message", who);
-    messageEl.innerHTML = `<div>${text}</div>`;
+    messageEl.innerHTML = `<div>${time.toLocaleString()} ${text}</div>`;
     messagesEl.append(messageEl);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   };
@@ -152,24 +154,41 @@
       printMessage(textMessage, "them");
     });
     newMessageEl.focus();
+
+    //const theirVideoContainer = document.querySelector(".video-container.them");
+    theirVideoContainer.querySelector(".name").innerText = peerId;
+    theirVideoContainer.classList.add("connected");
+    theirVideoContainer.querySelector(".start").classList.add("active");
+    theirVideoContainer.querySelector(".stop").classList.remove("active");
   });
 
-  //Event listener for click on "send".
-  sendButtonEl.addEventListener("click", () => {
+  //send message to peer.
+  const sendMessage = (e) => {
     if (!dataConnection) return;
-    //dataConnection.send(newMessageEl.value);
+    if (newMessageEl.value === "") return;
 
-    dataConnection.send(newMessageEl.value);
-    printMessage(newMessageEl.value, "me");
-    //Get new message from text input.
-
-    console.log(sendButtonEl);
-  });
-  newMessageEl.addEventListener("keyup", (e) => {
-    if (!dataConnection) return;
-    if (e.keyCode === 13) {
+    if (e.type === "click" || e.keyCode === 13) {
       dataConnection.send(newMessageEl.value);
       printMessage(newMessageEl.value, "me");
+
+      //clear text input field.
+      newMessageEl.value = "";
     }
+    //Set focus on text input field.
+    newMessageEl.focus();
+  };
+
+  //Event listener for click on "send".
+  sendButtonEl.addEventListener("click", sendMessage);
+
+  newMessageEl.addEventListener("keyup", sendMessage);
+
+  //Even listenet for click 'Start video' chat.
+  const startVideoButton = theirVideoContainer.querySelector(".start");
+  const stopVideoButton = theirVideoContainer.querySelector(".stop");
+  startVideoButton.addEventListener("click", () => {
+    console.log("Video start");
+    startVideoButton.classList.remove("active");
+    stopVideoButton.classList.add("active");
   });
 })();
