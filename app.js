@@ -2,18 +2,22 @@
 //wrappa varje app.js med (function(){})
 (function () {
   let dataConnection = null;
-  const myPeerId = location.hash.slice(1);
+  //const myPeerId = location.hash.slice(1);
   const peersEl = document.querySelector(".peers");
-  const newButtonEl = document.querySelector(".send-new-message-button");
+  const sendButtonEl = document.querySelector(".send-new-message-button");
   const newMessageEl = document.querySelector(".new-message");
   const messagesEl = document.querySelector(".messages");
+  const listPeersButtonEl = document.querySelector(".list-all-peers-button");
 
-  const printMessage = (text) => {
-    const messageContainer = document.createElement("div");
-    messageContainer.classList.add("message");
-    messageContainer.innerHTML = `<div>${text}</div>`;
-    messagesEl.append(messageContainer);
+  const printMessage = (text, who) => {
+    const messageEl = document.createElement("div");
+    messageEl.classList.add("message", who);
+    messageEl.innerHTML = `<div>${text}</div>`;
+    messagesEl.append(messageEl);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
   };
+
+  const myPeerId = location.hash.slice(1);
   //connect to to peer server
   peer = new Peer(myPeerId, {
     host: "glajan.com",
@@ -51,18 +55,22 @@
   });
   //On incoming connection
   peer.on("connection", (connection) => {
-    console.log(connection);
+    //close existing connection and set new connection
+    dataConnection && dataConnection.close();
 
+    //set new connection
     dataConnection = connection;
+
+    /*dataConnection = connection;
     dataConnection.on("data", (textMessage) => {
-      console.log(textMessage);
-    });
+      printMessage(textMessage);
+    });*/
 
     const event = new CustomEvent("peer-changed", { detail: connection.peer });
     document.dispatchEvent(event);
   });
   //Event listenet för click 'refresh list'
-  const listPeersButtonEl = document.querySelector(".list-all-peers-button");
+  //const listPeersButtonEl = document.querySelector(".list-all-peers-button");
 
   listPeersButtonEl.addEventListener("click", () => {
     peer.listAllPeers((peers) => {
@@ -100,9 +108,9 @@
         //const dataConnection = peer.connect(theirPeerId);
         dataConnection = peer.connect(theirPeerId);
 
-        dataConnection.on("data", (textMessage) => {
-          console.log(dataConnection.peer + ": " + textMessage);
-        });
+        /*dataConnection.on("data", (textMessage) => {
+          printMessage(textMessage);
+        });*/
 
         dataConnection.on("open", () => {
           //dispatch custome event with peer id.
@@ -125,7 +133,6 @@
     });
   });
   document.addEventListener("peer-changed", (e) => {
-    console.log(e);
     const peerId = e.detail;
 
     const connectButtonEl = document.querySelector(
@@ -138,16 +145,31 @@
 
     //add class 'connected' to click button.
     connectButtonEl.classList.add("connected");
+
+    connectButtonEl && connectButtonEl.classList.add("connected");
+
+    dataConnection.on("data", (textMessage) => {
+      printMessage(textMessage, "them");
+    });
+    newMessageEl.focus();
   });
 
   //Event listener for click on "send".
-  newButtonEl.addEventListener("click", () => {
+  sendButtonEl.addEventListener("click", () => {
     if (!dataConnection) return;
-    dataConnection.send(newMessageEl.value);
+    //dataConnection.send(newMessageEl.value);
 
     dataConnection.send(newMessageEl.value);
+    printMessage(newMessageEl.value, "me");
     //Get new message from text input.
 
-    //console.log(newButtonEl);
+    console.log(sendButtonEl);
+  });
+  newMessageEl.addEventListener("keyup", (e) => {
+    if (!dataConnection) return;
+    if (e.keyCode === 13) {
+      dataConnection.send(newMessageEl.value);
+      printMessage(newMessageEl.value, "me");
+    }
   });
 })();
