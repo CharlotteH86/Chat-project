@@ -2,7 +2,6 @@
 //wrappa varje app.js med (function(){})
 (function () {
   let dataConnection = null;
-  //const myPeerId = location.hash.slice(1);
   const peersEl = document.querySelector(".peers");
   const sendButtonEl = document.querySelector(".send-new-message-button");
   const newMessageEl = document.querySelector(".new-message");
@@ -48,7 +47,6 @@
 
   //Print peer id on connection 'open' event.
   peer.on("open", (id) => {
-    //console.log(id);
     const myPeerIdEl = document.querySelector(".my-peer-id");
     myPeerIdEl.innerText = id;
   });
@@ -63,25 +61,13 @@
     //set new connection
     dataConnection = connection;
 
-    /*dataConnection = connection;
-    dataConnection.on("data", (textMessage) => {
-      printMessage(textMessage);
-    });*/
-
     const event = new CustomEvent("peer-changed", { detail: connection.peer });
     document.dispatchEvent(event);
   });
   //Event listenet för click 'refresh list'
-  //const listPeersButtonEl = document.querySelector(".list-all-peers-button");
 
   listPeersButtonEl.addEventListener("click", () => {
     peer.listAllPeers((peers) => {
-      //console.log(peers);
-      /* const listItems = peers.filter((peerId)=>{
-      if(peerId === peer._id) return false;
-      return true;
-    })*/
-
       const peersList = peers
         .filter((peerId) => {
           if (peerId === peer._id) return false;
@@ -92,28 +78,18 @@
         })
         .join("");
 
-      //connect-button peerId-${peer}
-
       peersEl.innerHTML = `<ul> ${peersList}</ul>`;
 
       //Event listener for click on peer button
       peersEl.addEventListener("click", (e) => {
         if (!e.target.classList.contains("connect-button")) return;
-
-        console.log(e.target.innerText);
         const theirPeerId = e.target.innerHTML;
 
         //close existing connection
         dataConnection && dataConnection.close();
 
         //connect to peer
-        //const dataConnection = peer.connect(theirPeerId);
         dataConnection = peer.connect(theirPeerId);
-
-        /*dataConnection.on("data", (textMessage) => {
-          printMessage(textMessage);
-        });*/
-
         dataConnection.on("open", () => {
           //dispatch custome event with peer id.
           const event = new CustomEvent("peer-changed", {
@@ -122,16 +98,6 @@
           document.dispatchEvent(event);
         });
       });
-      //const ul =`<ul>"peersList"</ul>`;
-
-      //Add peers to html document
-      //connect-button peerId-${peer}
-      // <ul>
-      //  <li>
-      //      <button> "Peer id 1"</button>
-      //      <button> "Peer id 1"</button>
-      //  </li>
-      //</ul>
     });
   });
   document.addEventListener("peer-changed", (e) => {
@@ -155,7 +121,6 @@
     });
     newMessageEl.focus();
 
-    //const theirVideoContainer = document.querySelector(".video-container.them");
     theirVideoContainer.querySelector(".name").innerText = peerId;
     theirVideoContainer.classList.add("connected");
     theirVideoContainer.querySelector(".start").classList.add("active");
@@ -187,7 +152,6 @@
   const startVideoButton = theirVideoContainer.querySelector(".start");
   const stopVideoButton = theirVideoContainer.querySelector(".stop");
   startVideoButton.addEventListener("click", () => {
-    console.log("Video start");
     startVideoButton.classList.remove("active");
     stopVideoButton.classList.add("active");
   });
