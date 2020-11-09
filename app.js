@@ -2,6 +2,7 @@
 //wrappa varje app.js med (function(){})
 (function () {
   let dataConnection = null;
+  let mediaConnection = null;
   const peersEl = document.querySelector(".peers");
   const sendButtonEl = document.querySelector(".send-new-message-button");
   const newMessageEl = document.querySelector(".new-message");
@@ -9,6 +10,7 @@
   const listPeersButtonEl = document.querySelector(".list-all-peers-button");
   const time = new Date();
   const theirVideoContainer = document.querySelector(".video-container.them");
+  const videoOfThemEl = document.querySelector(".video-container.them video");
 
   const printMessage = (text, who) => {
     const messageEl = document.createElement("div");
@@ -53,8 +55,28 @@
   peer.on("error", (errorMessage) => {
     console.error(errorMessage);
   });
+
   //On incoming connection
   peer.on("connection", (connection) => {
+    //event listenet on incominh vidoecall
+    peer.on("call", (incomingCall) => {
+      mediaConnection && mediaConnection.close();
+
+      //change state of start/top button
+      startVideoButton.classList.remove("active");
+      stopVideoButton.classList.add("active");
+      //Answer incoming call.
+      navigator.mediaDevices
+        .getUserMedia({ audio: false, video: true })
+        .then((myStream) => {
+          incomingCall.answer(myStream);
+          mediaConnection = incomingCall;
+          mediaConnection.on("stream", (theirStream) => {
+            videoOfThemEl.muted = true;
+            videoOfThemEl.srcObject = theirStream;
+          });
+        });
+    });
     //close existing connection and set new connection
     dataConnection && dataConnection.close();
 
@@ -156,12 +178,30 @@
     stopVideoButton.classList.add("active");
 
     navigator.mediaDevices
-    .getUserMedia({ audio: false, video: true })
-    .then((stream) => {
-      const video = document.querySelector(".video-container.me video");
-      video.muted = true;
-      video.srcObject = stream;
-    });
-    
+      .getUserMedia({ audio: false, video: true })
+      .then((stream) => {
+        const video = document.querySelector(".video-container.me video");
+        video.muted = true;
+        video.srcObject = stream;
+      });
+
+    //Start video call with remote peer
+    navigator.mediaDevices
+      .getUserMedia({ audio: false, video: true })
+      .then((myStream) => {
+        mediaConnection && mediaConnection.close();
+        const theirPeerId = dataConnection.peer;
+        mediaConnection = peer.call(theirPeerId, myStream);
+        mediaConnection.on("stream", (theirStream) => {
+          videoOfThemEl.muted = true;
+          videoOfThemEl.srcObject = theirStream;
+        });
+      });
+  });
+  //Event listener for click 'hang up'
+  stopVideoButton.addEventListener("click", () => {
+    stopVideoButton.classList.remove("active");
+    startVideoButton.classList.add("active");
+    mediaConnection && mediaConnection.close();
   });
 })();
