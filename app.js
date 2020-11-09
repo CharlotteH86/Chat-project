@@ -58,13 +58,14 @@
 
   //On incoming connection
   peer.on("connection", (connection) => {
-    //event listenet on incominh vidoecall
-    peer.on("call", (incomingCall) => {
+    //event listener on incoming videocall DENNA KOD ÄR EV. FEL
+    /*peer.on("call", (incomingCall) => {
       mediaConnection && mediaConnection.close();
 
-      //change state of start/top button
+      //change state of start/stop button
       startVideoButton.classList.remove("active");
       stopVideoButton.classList.add("active");
+
       //Answer incoming call.
       navigator.mediaDevices
         .getUserMedia({ audio: false, video: true })
@@ -76,7 +77,8 @@
             videoOfThemEl.srcObject = theirStream;
           });
         });
-    });
+    });*/
+
     //close existing connection and set new connection
     dataConnection && dataConnection.close();
 
@@ -86,6 +88,28 @@
     const event = new CustomEvent("peer-changed", { detail: connection.peer });
     document.dispatchEvent(event);
   });
+  //event listener on incoming videocall SAMMA SOM OVAN EV. FEL
+  peer.on("call", (incomingCall) => {
+    mediaConnection && mediaConnection.close();
+
+    //change state of start/stop button
+    startVideoButton.classList.remove("active");
+    stopVideoButton.classList.add("active");
+
+    //Answer incoming call.
+    navigator.mediaDevices
+      .getUserMedia({ audio: false, video: true })
+      .then((myStream) => {
+        incomingCall.answer(myStream);
+        mediaConnection = incomingCall;
+        mediaConnection.on("stream", (theirStream) => {
+          videoOfThemEl.muted = true;
+          videoOfThemEl.srcObject = theirStream;
+        });
+      });
+  });
+
+
   //Event listenet för click 'refresh list'
 
   listPeersButtonEl.addEventListener("click", () => {
@@ -176,6 +200,7 @@
   startVideoButton.addEventListener("click", () => {
     startVideoButton.classList.remove("active");
     stopVideoButton.classList.add("active");
+    mediaConnection && mediaConnection.close();
 
     navigator.mediaDevices
       .getUserMedia({ audio: false, video: true })
