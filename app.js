@@ -154,5 +154,14 @@
   startVideoButton.addEventListener("click", () => {
     startVideoButton.classList.remove("active");
     stopVideoButton.classList.add("active");
+
+    navigator.mediaDevices
+    .getUserMedia({ audio: false, video: true })
+    .then((stream) => {
+      const video = document.querySelector(".video-container.me video");
+      video.muted = true;
+      video.srcObject = stream;
+    });
+    
   });
 })();
