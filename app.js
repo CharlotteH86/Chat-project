@@ -58,27 +58,6 @@
 
   //On incoming connection
   peer.on("connection", (connection) => {
-    //event listener on incoming videocall DENNA KOD ÄR EV. FEL
-    /*peer.on("call", (incomingCall) => {
-      mediaConnection && mediaConnection.close();
-
-      //change state of start/stop button
-      startVideoButton.classList.remove("active");
-      stopVideoButton.classList.add("active");
-
-      //Answer incoming call.
-      navigator.mediaDevices
-        .getUserMedia({ audio: false, video: true })
-        .then((myStream) => {
-          incomingCall.answer(myStream);
-          mediaConnection = incomingCall;
-          mediaConnection.on("stream", (theirStream) => {
-            videoOfThemEl.muted = true;
-            videoOfThemEl.srcObject = theirStream;
-          });
-        });
-    });*/
-
     //close existing connection and set new connection
     dataConnection && dataConnection.close();
 
@@ -108,7 +87,6 @@
         });
       });
   });
-
 
   //Event listenet för click 'refresh list'
 
